@@ -1,0 +1,110 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: BP Checkins Enhanced\n"
+"POT-Creation-Date: 2013-11-18 01:17+0530\n"
+"PO-Revision-Date: 2013-12-02 20:13+0100\n"
+"Last-Translator: 3dolab <boss@3dolab.net>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.5\n"
+"X-Poedit-KeywordsList: _e;__\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SearchPath-0: .\n"
+
+msgid "Waiting..."
+msgstr "Attendi..."
+
+msgid "E-mail address is already in use"
+msgstr "L'indirizzo email risulta già occupato"
+
+msgid "Thank You for your visit"
+msgstr "Grazie per averci visitato"
+
+msgid "Go!"
+msgstr "Inizia"
+
+msgid "Registration Successful"
+msgstr "Iscrizione avvenuta"
+
+msgid "You must fill out an e-mail address"
+msgstr "Occorre inserire un indirizzo email"
+
+msgid "E-mail address is invalid"
+msgstr "L'indirizzo non è valido"
+
+msgid "Could not add user"
+msgstr "Impossibile aggiungere l'utente"
+
+msgid "User registration successful: please check your e-mail"
+msgstr "Registrazione avvenuta con successo: controlla la posta"
+
+msgid "enter e-mail address"
+msgstr "inserisci indirizzo email"
+
+msgid "Subscribe"
+msgstr "Iscriviti"
+
+msgid "Receive Updates"
+msgstr "Ricevi Aggiornamenti"
+
+msgid "place"
+msgstr "luogo"
+
+msgid "places"
+msgstr "luoghi"
+
+msgid "event"
+msgstr "evento"
+
+msgid "events"
+msgstr "eventi"
+
+msgid "city"
+msgstr "citta"
+
+msgid "Events"
+msgstr "Eventi"
+
+msgid "Event"
+msgstr "Evento"
+
+msgid "All Events"
+msgstr "Tutti gli Eventi"
+
+msgid "Add New Event"
+msgstr "Aggiungi Nuovo Evento"
+
+msgid "New Event"
+msgstr "Nuovo Evento"
+
+msgid "View Event"
+msgstr "Vedi Evento"
+
+msgid "Edit Event"
+msgstr "Modifica Evento"
+
+msgid "Search Events"
+msgstr "Cerca Eventi"
+
+msgid "No Events Found"
+msgstr "Nessun Evento Trovato"
+
+msgid "No Events Found in Trash"
+msgstr "Nessun Evento nel Cestino"
+
+msgid "Location"
+msgstr "Indirizzo"
+
+msgid "places_category"
+msgstr "categoria_luoghi"
+
+msgid "from"
+msgstr "dal"
+
+msgid "to"
+msgstr "al"
+
+msgid "until"
+msgstr "fino al"
