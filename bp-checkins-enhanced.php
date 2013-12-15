@@ -362,7 +362,13 @@ add_action('bp_directory_members_actions', 'bp_checkins_add_members_position', 9
 //add_action('bp_directory_members_item', 'bp_checkins_add_members_position', 99);
 
 function bp_checkins_load_members_map(){
-	
+
+	//if( (int)bp_get_option( 'bp-checkins-disable-geo-friends' ) )
+		//return false;
+		
+	if( (int)bp_get_option( 'bp-checkins-disable-activity-checkins' ) && ( !(int)bp_get_option( 'bp-checkins-activate-component' ) || '' == bp_get_option( 'bp-checkins-activate-component' ) ) )
+		return false;
+		
 	$user_id = bp_displayed_user_id();
 	
 	if(!$user_id) {
@@ -384,14 +390,14 @@ function bp_checkins_load_members_map(){
 			var displayedUserLng = "<?php echo $lng;?>";
 			var displayedUserAddress = "<?php echo $address;?>";
 			var displayedUserPin = "<?php echo plugin_dir_url( __FILE__ ) . 'images/blackpin.png'; ?>";
-			var defaultPlacePin = "<?php echo plugin_dir_url( __FILE__ ) . 'images/blackpin.png'; ?>";
+			var defaultPlacePin = "<?php echo plugin_dir_url( __FILE__ ) . 'images/pin.png'; ?>";
 		</script>
 		
 	<?php else :?>
 	
 		<script type="text/javascript">
 			var displayedUserPin = "<?php echo plugin_dir_url( __FILE__ ) . 'images/blackpin.png'; ?>";
-			var defaultPlacePin = "<?php echo plugin_dir_url( __FILE__ ) . 'images/blackpin.png'; ?>";
+			var defaultPlacePin = "<?php echo plugin_dir_url( __FILE__ ) . 'images/pin.png'; ?>";
 		</script>
 		
 	<?php endif;?>
@@ -402,6 +408,9 @@ function bp_checkins_load_members_map(){
 //add_action('bp_members_screen_index', 'bp_checkins_load_members_map');
 add_action('bp_before_directory_members', 'bp_checkins_load_members_map');
 add_action('bp_before_directory_checkins', 'bp_checkins_load_members_map');
+//add_action('bp_before_directory_activity', 'bp_checkins_load_members_map');
+add_action('activity_loop_start', 'bp_checkins_load_members_map');
+add_action('bp_before_member_friends_content', 'bp_checkins_load_members_map');
 
 //bp_checkins_place_geolocate
 //bp_checkins_place_display_cats
@@ -428,9 +437,12 @@ function bp_checkins_enhanced_load_gmap3() {
 			}
 			
 		} elseif( bp_checkins_show_friends_checkins() ){
-		
-			wp_enqueue_script( 'bp-ckeckins-friends', BP_CHECKINS_PLUGIN_URL_JS . '/bp-checkins-friends.js' );
-			
+			wp_dequeue_script( 'bp-ckeckins-friends' );
+			wp_deregister_script( 'bp-ckeckins-friends' );
+			wp_register_script( 'bp-ckeckins-friends', plugin_dir_url( __FILE__ ) . 'js/bp-checkins-friends.js' );
+			wp_enqueue_script( 'bp-ckeckins-friends');
+			remove_action('bp_before_member_friends_content', 'bp_checkins_load_friends_map');
+			add_action('bp_before_member_friends_content', 'bp_checkins_load_members_map');
 		} else {
 			
 			if( bp_checkins_is_directory() || bp_checkins_is_group_checkins_area() ) {
@@ -444,8 +456,12 @@ function bp_checkins_enhanced_load_gmap3() {
 				remove_action( 'bp_places_entry_content', 'bp_checkins_display_place_checkin');
 				add_action( 'bp_places_entry_content', 'bp_checkins_enhanced_display_place_checkin');
 			} else {
-				wp_enqueue_script( 'bp-ckeckins', BP_CHECKINS_PLUGIN_URL_JS . '/bp-checkins.js' );
+				wp_dequeue_script( 'bp-ckeckins' );
+				wp_deregister_script( 'bp-ckeckins' );
+				wp_register_script( 'bp-ckeckins', plugin_dir_url( __FILE__ ) . 'js/bp-checkins.js' );
+				wp_enqueue_script( 'bp-ckeckins');
 				bp_checkins_localize_script('activity');
+				add_action('activity_loop_start', 'bp_checkins_load_members_map');
 			}
 			
 		}

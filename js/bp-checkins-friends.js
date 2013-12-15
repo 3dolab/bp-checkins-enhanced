@@ -4,7 +4,7 @@ jQuery(document).ready(function($){
 	
 	if( typeof displayedUserLat !=='undefined' && typeof displayedUserLng !=='undefined' ){
 		bpciPosition = new google.maps.LatLng(displayedUserLat,displayedUserLng);
-		arrayMarkers.push( {lat:displayedUserLat, lng:displayedUserLng, data:$("#item-header-avatar a").html()} );
+		arrayMarkers.push( {lat:displayedUserLat, lng:displayedUserLng, data:$("#item-header-avatar").html()} );
 	}
 	
 	$("#members-list .action .activity-checkin").each(function(){
@@ -56,38 +56,62 @@ jQuery(document).ready(function($){
 	
 	$("#bpci-map_container").append('<div id="bpci-map"></div>');
 	$("#bpci-map").css('width','100%');
+	$("#bpci-map").css('height','360px');
 	
-	$('#bpci-map').gmap3(
-      { action: 'init',
-        center:bpciPosition,
-		callback:function(map){
-			for (var i=0; i < arrayMarkers.length ; i++ ) {
-              add($(this), i, arrayMarkers[i].lat, arrayMarkers[i].lng, arrayMarkers[i].data);
-			  map.setCenter(bpciPosition);
-			  map.setZoom(6);
-            }
-		}
-    
-  });
+	var newMarkers = new Array();
+	var newOverlays = new Array();
+	for (var i=0; i < arrayMarkers.length ; i++ ) {
+		//alert(arrayMarkers[i].data);
+		newMarkers[i] = {
+			latLng:[arrayMarkers[i].lat, arrayMarkers[i].lng], 
+			data: arrayMarkers[i].data,
+			options:{icon: arrayMarkers[i].pin}
+			}
+		newOverlays[i] = {
+			latLng:[arrayMarkers[i].lat, arrayMarkers[i].lng], 
+			data: arrayMarkers[i].data,
+			options:{content: '<div class="bpci-avatar"><s></s><i></i><span>' + arrayMarkers[i].data + '</span></div>',
+						offset:{
+							y:-40,
+							x:10
+							}
+					}
+			}
+	}
+  $('#bpci-map').gmap3(
+      { map: { 
+			options: { 
+				center:bpciPosition,
+				zoom: 6,
+				mapTypeId: google.maps.MapTypeId.TERRAIN,
+				callback:function(map){
+					for (var i=0; i < arrayMarkers.length ; i++ ) {
+					  add($(this), i, arrayMarkers[i].lat, arrayMarkers[i].lng, arrayMarkers[i].data);
+					  map.setCenter(bpciPosition);
+					  map.setZoom(6);
+					}
+				}
+			},
+		},
+		overlay: {
+		  values: newOverlays
+		}    
+	});
   
   function add($this, i, lat, lng, data){
-    $this.gmap3(
-    { action: 'addMarker',
-      latLng: [lat, lng],
-      
-    },
-    { action:'addOverlay',
-      latLng: [lat, lng],
-      options:{
-        content: '<div class="bpci-avatar"><s></s><i></i><span>' + data + '</span></div>',
-        offset:{
-          	y:-40,
-          	x:10
-        	}
-      	}
-
-    },
-	{ action:'clear', name:'marker'});
+    $this.gmap3({
+			overlay: { 
+				latLng:[lat, lng], 
+				data: data, 
+				options: {
+					content: data,
+					offset:{
+						y:-40,
+						x:10
+						}
+				}
+			}
+	});
   }
 	
 });
