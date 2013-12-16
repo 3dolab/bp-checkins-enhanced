@@ -1218,6 +1218,7 @@ jQuery(document).ready(function($){
 			lng = Number(latlongtoparse[1]);			
 			var latLong = new google.maps.LatLng(lat, lng);			
 			//map = $('#'+map_selector).gmap3({ action:'get', name:'map'});
+			map = $('#'+map_selector).gmap3("get");
 			if ( scope == 'places' ) { 
 				var infotitle = $(this).parent().parent().find('.places-avatar').parent().find('.places-inner h4').html();
 				var infotext = $(this).parent().parent().find('.places-avatar').parent().find('.places-inner .place-excerpt').html();			

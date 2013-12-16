@@ -41,16 +41,33 @@ jQuery(document).ready(function($){
 		
 		var latLong = new google.maps.LatLng(lat, lng);
 		
-		
-		map = $('#bpci-map').gmap3({ action:'get', name:'map'});
+		map = $('#bpci-map').gmap3("get");
+		//map = $('#bpci-map').gmap3({ action:'get', name:'map'});
 		
 		if( -1 == bpci_is_on_map( lat, lng, $(this).parent().parent().parent().find('.item-avatar').html() ) ) {
 			add($('#bpci-map'), arrayMarkers.length, lat, lng, $(this).parent().parent().parent().find('.item-avatar').html());
 			arrayMarkers.push( {lat:lat, lng:lng, data:$(this).parent().parent().parent().find('.item-avatar').html()} );
 		}
 		
-		map = $('#bpci-map').gmap3({ action:'get', name:'map'});
-		map.setCenter(latLong);
+		//map = $('#bpci-map').gmap3({ action:'get', name:'map'});
+		//map.setCenter(latLong);
+		map = $('#bpci-map').gmap3("get");
+		$('#bpci-map').gmap3(		
+			{ map: { 
+				options: { 
+					center:latLong,
+					zoom: 11,
+					mapTypeId: google.maps.MapTypeId.TERRAIN,
+					callback:function(map){
+						for (var i=0; i < arrayMarkers.length ; i++ ) {
+						  add($(this), i, arrayMarkers[i].lat, arrayMarkers[i].lng, arrayMarkers[i].data);
+						  map.setCenter(latLong);
+						  map.setZoom(11);
+						}
+					}
+				},
+			}
+		});
 		
 	});
 	
@@ -102,13 +119,12 @@ jQuery(document).ready(function($){
     $this.gmap3({
 			overlay: { 
 				latLng:[lat, lng], 
-				data: data, 
-				options: {
-					content: data,
-					offset:{
-						y:-40,
-						x:10
-						}
+				data: data,
+				options:{content: '<div class="bpci-avatar"><s></s><i></i><span>' + data + '</span></div>',
+							offset:{
+								y:-40,
+								x:10
+							}
 				}
 			}
 	});

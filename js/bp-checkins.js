@@ -35,13 +35,14 @@ jQuery(document).ready(function($){
 						if(latLng){
 							position = latLng;
 							$(this).gmap3({
-								action:'getAddress',
-								latLng:latLng,
-								callback:function(results){
-									adresse = results && results[1] ? results && results[1].formatted_address : 'no address';
-									$.cookie("bp-ci-data", latLng.lat()+"|"+latLng.lng()+"|"+adresse, { path: '/' });
-									$.cookie("bp-ci-data-delete", '', { path: '/' });
-									$("#bpci-position-inputs").html('<input type="hidden" name="bpci-lat" id="bpci-lat" value="'+latLng.lat()+'"><input type="hidden" name="bpci-lng" id="bpci-lng" value="'+latLng.lng()+'"><input type="text" readonly value="'+adresse+'" id="bpci-address" name="bpci-address" placeholder="'+bp_checkins_vars.addressPlaceholder+'"><a href="#" id="bpci-show-on-map" class="map-action" title="'+buttonTitle+'"><span>'+buttonTitle+'</span></a><a href="#" id="bpci-mod-position" class="map-action" title="'+bp_checkins_vars.modCheckinTitle+'"><span>'+bp_checkins_vars.modCheckinTitle+'</span></a><a href="#" id="bpci-reset-position" class="map-action" title="'+bp_checkins_vars.resetCheckinTitle+'"><span>'+bp_checkins_vars.resetCheckinTitle+'</span></a>');
+								getaddress:{
+									latLng:latLng,
+									callback:function(results){
+										adresse = results && results[1] ? results && results[1].formatted_address : 'no address';
+										$.cookie("bp-ci-data", latLng.lat()+"|"+latLng.lng()+"|"+adresse, { path: '/' });
+										$.cookie("bp-ci-data-delete", '', { path: '/' });
+										$("#bpci-position-inputs").html('<input type="hidden" name="bpci-lat" id="bpci-lat" value="'+latLng.lat()+'"><input type="hidden" name="bpci-lng" id="bpci-lng" value="'+latLng.lng()+'"><input type="text" readonly value="'+adresse+'" id="bpci-address" name="bpci-address" placeholder="'+bp_checkins_vars.addressPlaceholder+'"><a href="#" id="bpci-show-on-map" class="map-action" title="'+buttonTitle+'"><span>'+buttonTitle+'</span></a><a href="#" id="bpci-mod-position" class="map-action" title="'+bp_checkins_vars.modCheckinTitle+'"><span>'+bp_checkins_vars.modCheckinTitle+'</span></a><a href="#" id="bpci-reset-position" class="map-action" title="'+bp_checkins_vars.resetCheckinTitle+'"><span>'+bp_checkins_vars.resetCheckinTitle+'</span></a>');
+									}
 								}
 							});
 						} else {
