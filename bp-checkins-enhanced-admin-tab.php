@@ -84,6 +84,82 @@ function bp_checkins_enhanced_settings_admin( $tab, $admin_page ){
 									</td>
 								</tr>
 								<tr>
+									<th scope="row"><?php _e( 'Markers', 'bp-checkins' ) ?> (n/a)</th>
+									<td>
+										<input type="text" name="bpci-admin[bp-checkins-enhanced-default-pin]" 
+										<?php if ( bp_get_option( 'bp-checkins-enhanced-place-default-pin' ) ){
+											echo 'value="'. bp_get_option( 'bp-checkins-enhanced-place-default-pin' ) .'"'; 
+										} else {
+											echo 'value="'.dirname( __FILE__ ) . '/images/pin.png"';
+										}
+										?>	 
+										 id="bp-checkins-enhanced-default-pin"/> &nbsp;<?php _e( 'Default Pin', 'bp-checkins-enhanced' );?><br />
+										 <input type="text" name="bpci-admin[bp-checkins-enhanced-black-pin]" 
+										 <?php if ( bp_get_option( 'bp-checkins-enhanced-place-black-pin' ) ){
+											echo 'value="'. bp_get_option( 'bp-checkins-enhanced-place-black-pin' ) .'"'; 
+										} else {
+											echo 'value="'.dirname( __FILE__ ) . '/images/blackpin.png"';
+										}
+										?>	 
+										 id="bp-checkins-enhanced-black-pin"/> &nbsp;<?php _e( 'Current Pin', 'bp-checkins-enhanced' );?><br />
+										<?php if( (int)bp_get_option( 'bp-checkins-enhanced-clustering' ) && '' != bp_get_option( 'bp-checkins-enhanced-clustering' ) ):?>	
+										<input type="text" size="5" name="bpci-admin[bp-checkins-enhanced-cluster-radius]" 
+										<?php if ( bp_get_option( 'bp-checkins-enhanced-cluster-radius' ) ){
+											echo 'value="'. bp_get_option( 'bp-checkins-enhanced-cluster-radius' ) .'"'; 
+										} else {
+											echo 'value="50"';
+										}
+										?>	 
+										 id="bp-checkins-enhanced-place-cluster-radius"/> &nbsp;<?php _e( 'Cluster Radius', 'bp-checkins-enhanced' );?><br />
+										 <input type="text" name="bpci-admin[bp-checkins-enhanced-cluster-1-pin]" 
+										<?php if ( bp_get_option( 'bp-checkins-enhanced-cluster-1-pin' ) ){
+											echo 'value="'. bp_get_option( 'bp-checkins-enhanced-cluster-1-pin' ) .'"'; 
+										} else {
+											echo 'value="'.dirname( __FILE__ ) . '/images/cluster-1.png"';
+										}
+										?>	 
+										 id="bp-checkins-enhanced-place-cluster-1-pin"/> &nbsp;<?php _e( 'Cluster 1', 'bp-checkins-enhanced' );?>&nbsp;
+										 <input type="text" size="4" name="bpci-admin[bp-checkins-enhanced-cluster-1-size]" id="bp-checkins-enhanced-place-cluster-1-size"
+										<?php if ( bp_get_option( 'bp-checkins-enhanced-cluster-1-size' ) ){
+											echo 'value="'. bp_get_option( 'bp-checkins-enhanced-cluster-1-size' ) .'"'; 
+										} else {
+											echo 'value="0"';
+										}
+										?>/>&nbsp;<?php _e( 'size', 'bp-checkins-enhanced' );?><br />
+										<input type="text" name="bpci-admin[bp-checkins-enhanced-cluster-2-pin]" 
+										<?php if ( bp_get_option( 'bp-checkins-enhanced-cluster-2-pin' ) ){
+											echo 'value="'. bp_get_option( 'bp-checkins-enhanced-cluster-2-pin' ) .'"'; 
+										} else {
+											echo 'value="'.dirname( __FILE__ ) . '/images/cluster-2.png"';
+										}
+										?>	 
+										 id="bp-checkins-enhanced-place-cluster-2-pin"/> &nbsp;<?php _e( 'Cluster 2', 'bp-checkins-enhanced' );?>&nbsp;
+										 <input type="text" size="4" name="bpci-admin[bp-checkins-enhanced-cluster-2-size]" id="bp-checkins-enhanced-place-cluster-2-size"
+										<?php if ( bp_get_option( 'bp-checkins-enhanced-cluster-2-size' ) ){
+											echo 'value="'. bp_get_option( 'bp-checkins-enhanced-cluster-2-size' ) .'"'; 
+										} else {
+											echo 'value="5"';
+										}
+										?>/>&nbsp;<?php _e( 'size', 'bp-checkins-enhanced' );?><br />
+										<input type="text" name="bpci-admin[bp-checkins-enhanced-cluster-3-pin]" 
+										<?php if ( bp_get_option( 'bp-checkins-enhanced-cluster-3-pin' ) ){
+											echo 'value="'. bp_get_option( 'bp-checkins-enhanced-cluster-3-pin' ) .'"'; 
+										} else {
+											echo 'value="'.dirname( __FILE__ ) . '/images/cluster-3.png"';
+										}
+										?>	 
+										 id="bp-checkins-enhanced-place-cluster-3-pin"/> &nbsp;<?php _e( 'Cluster 3', 'bp-checkins-enhanced' );?>&nbsp;
+										 <input type="text" size="4" name="bpci-admin[bp-checkins-enhanced-cluster-3-size]" id="bp-checkins-enhanced-place-cluster-3-size"
+										<?php if ( bp_get_option( 'bp-checkins-enhanced-cluster-3-size' ) ){
+											echo 'value="'. bp_get_option( 'bp-checkins-enhanced-cluster-3-size' ) .'"'; 
+										} else {
+											echo 'value="10"';
+										}
+										?>/>&nbsp;<?php _e( 'size', 'bp-checkins-enhanced' );?><br />
+										 <?php endif; ?>
+									</td>
+								</tr>								
+								<tr>
 									<th scope="row"><?php _e( 'Infowindow', 'bp-checkins-enhanced' ) ?> (n/a)</th>
 									<td>
 										<input type="radio" name="bpci-admin[bp-checkins-enhanced-infowindow]"<?php if ( (int)bp_get_option( 'bp-checkins-enhanced-infowindow' ) ) : ?> checked="checked"<?php endif; ?> id="bp-checkins-enhanced-infowindow-yes" value="1" /> <?php _e( 'Yes', 'bp-checkins' ) ?> &nbsp;
