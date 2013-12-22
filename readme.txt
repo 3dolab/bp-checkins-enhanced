@@ -14,6 +14,10 @@ Enhancements over the BP Checkins plugin to post checkins or places.
 
 == Changelog ==
 
+= 0.3 =
+* admin panel (by replacing original BP Checkins admin.php)
+* theme-independent picking of marker data
+
 = 0.2 =
 * public alpha
 

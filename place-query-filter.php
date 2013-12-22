@@ -1,10 +1,47 @@
 <?php
 
-load_plugin_textdomain( 'bp-checkins-enhanced', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
-
 require_once ( dirname( __FILE__ ) . '/register-post-type-with-dates.php' );
 
-function bp_checkins_register_city_taxonomy() {	
+function auto_set_city_taxonomy($place) {
+	if ( is_int($place) && get_post_type($place) != 'places' )
+		return;
+		
+	if ( is_int( $place ) ) {
+		$post_id = $place;
+		//$lat = get_post_meta($post_id,'bpci_places_lat',true);
+		//$long = get_post_meta($post_id,'bpci_places_lng',true);
+		$address = get_post_meta($post_id,'bpci_places_address',true);
+		if(isset( $_REQUEST['bpci_places_address']))
+			$address = $_REQUEST['bpci_places_address'];
+		if(isset( $_REQUEST['bpci-address']))
+			$address = $_REQUEST['bpci-address'];
+	} elseif ( is_object( $place ) ) {
+		$address = $place->address;
+	} 
+		$post_id = $place->id;
+		$converted_address = bpce_GmwConvertToCoords($address);
+
+		//print_r($address);
+		//print_r($converted_address);
+
+		if(!empty($converted_address)):
+			$place_cities = wp_get_object_terms($post_id, 'city');
+			$city = $converted_address['province'];
+			if(!empty($place_cities)&&!is_wp_error( $place_cities )):
+				foreach($place_cities as $place_city):
+					if( $place_city->slug == $city || $place_city->name == $city )
+						return;
+				endforeach;
+			endif;
+			$city_term = get_term_by('name', $city, 'city');
+			if(empty($city_term))
+				wp_set_object_terms( $post_id, $city, 'city' );
+			if(!empty($city_term))
+				wp_set_object_terms( $post_id, $city_term->slug, 'city' );
+		endif;
+}
+
+function bp_checkins_enhanced_register_post_type() {	
 
 	if ( function_exists( 'bp_checkins_init' ) ){
 	
@@ -92,6 +129,15 @@ function bp_checkins_register_city_taxonomy() {
 			register_post_type_with_dates( 'events', $event_args );
 		else
 			register_post_type( 'events', $event_args );
+				
+	}
+	
+}
+function bp_checkins_enhanced_register_taxonomy() {	
+
+	if ( function_exists( 'bp_checkins_init' ) ){
+	
+	global $bp, $wpdb;
 		
 		register_taxonomy( 'city', 
 			array( 'places', 'events' ),
@@ -106,7 +152,7 @@ function bp_checkins_register_city_taxonomy() {
 		register_taxonomy( 'places_category', 
 			array( 'places', 'events' ),
 			array( 	'hierarchical' 	=> true, 
-					'label' 		=> __('City', 'bp-checkins-enhanced' ),
+					'label' 		=> __('Place Category', 'bp-checkins-enhanced' ),
 					'public' 		=> true, 
 					'show_ui' 		=> true,
 					'query_var' 	=> 'places-category',
@@ -116,7 +162,8 @@ function bp_checkins_register_city_taxonomy() {
 	}
 	
 }
-add_action( 'init', 'bp_checkins_register_city_taxonomy', 99 );
+add_action( 'init', 'bp_checkins_enhanced_register_post_type', 99 );
+add_action( 'init', 'bp_checkins_enhanced_register_taxonomy', 99 );
 
 function post_query_places_to_events( $wp_query ) {
 	//global $gloss_category;  

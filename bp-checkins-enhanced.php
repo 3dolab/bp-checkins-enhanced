@@ -46,14 +46,67 @@ if ( basename(dirname(__FILE__)) == 'plugins' )
 else define("BLANK_DIR" , basename(dirname(__FILE__)) . '/');
 define("BLANK_PATH", WP_PLUGIN_URL . "/" . BLANK_DIR);
 */
-//require_once ( dirname( __FILE__ ) . '/bp-checkins-enhanced-admin.php' );
-require_once ( dirname( __FILE__ ) . '/data-sync.php' );
-require_once ( dirname( __FILE__ ) . '/place-query-filter.php' );
-require_once ( dirname( __FILE__ ) . '/event-calendar-widget.php' );
-require_once ( dirname( __FILE__ ) . '/ajax-registration.php' );
+load_plugin_textdomain( 'bp-checkins-enhanced', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+
+function bp_checkins_enhanced_init() {
+	
+	if( defined('BP_CHECKINS_PLUGIN_VERSION') && BP_CHECKINS_PLUGIN_VERSION == '1.2.2'  ) {
+		global $bp;
+		
+		if( is_admin() ){
+			if(!file_exists(BP_CHECKINS_PLUGIN_DIR."/includes/bp-checkins-admin.bpce"))
+				if( rename( BP_CHECKINS_PLUGIN_DIR."/includes/bp-checkins-admin.php", BP_CHECKINS_PLUGIN_DIR."/includes/bp-checkins-admin.bpce" ))
+					if(copy( dirname( __FILE__ ) . '/bp-checkins-admin.php', BP_CHECKINS_PLUGIN_DIR."/includes/bp-checkins-admin.php" ))
+						echo 'ADMIN PAGE CREATED';
+			require_once ( dirname( __FILE__ ) . '/bp-checkins-enhanced-admin-tab.php' );
+			//require_once ( dirname( __FILE__ ) . '/bp-checkins-enhanced-admin.php' );
+		}
+		//POST META CONVERSION BETWEEN GEOMYWP, GEOTHEME / GEOPLACES AND BP CHECKINS
+		//require_once ( dirname( __FILE__ ) . '/data-sync.php' );
+
+		if ( (int)bp_get_option( 'bp-checkins-enhanced-activate-component' ) ) {
+		
+			if ( (int)bp_get_option( 'bp-checkins-enhanced-places-events' ) )
+				require_once ( dirname( __FILE__ ) . '/place-query-filter.php' );
+			if ( (int)bp_get_option( 'bp-checkins-enhanced-event-calendar' ) )
+				require_once ( dirname( __FILE__ ) . '/event-calendar-widget.php' );
+			if ( (int)bp_get_option( 'bp-checkins-enhanced-ajax-registration' ) )
+				require_once ( dirname( __FILE__ ) . '/ajax-registration.php' );
+		
+			add_action('xprofile_profile_field_data_updated', 'cross_update_user_location_public', 10, 2);
+			
+			//add_action( 'save_post', 'auto_set_city_taxonomy' );
+			//add_action( 'bp_checkins_places_after_address_postmeta_update', 'auto_set_city_taxonomy' );
+			//add_action( 'bp_checkins_places_after_address_postmeta_insert', 'auto_set_city_taxonomy' );
+			if ( (int)bp_get_option( 'bp-checkins-enhanced-places-events' ) )
+				add_action( 'bp_checkins_places_after_save', 'auto_set_city_taxonomy' );
+			
+			add_action( 'bp_loaded', 'bp_checkins_enhanced_load_core_actions' );
+			
+			add_action('bp_directory_members_actions', 'bp_checkins_add_members_position', 99);
+			//add_action('bp_directory_members_item', 'bp_checkins_add_members_position', 99);
+			
+			//add_action('bp_before_members_friends_content', 'bp_checkins_load_members_map');
+			//add_action('bp_members_screen_index', 'bp_checkins_load_members_map');
+			add_action('bp_before_directory_members', 'bp_checkins_load_members_map');
+			add_action('bp_before_directory_checkins', 'bp_checkins_load_members_map');
+			//add_action('bp_before_directory_activity', 'bp_checkins_load_members_map');
+			add_action('activity_loop_start', 'bp_checkins_load_members_map');
+			add_action('bp_before_member_places_body', 'bp_checkins_load_members_map');
+			add_action('bp_before_member_checkins_body', 'bp_checkins_load_members_map');
+			add_action('bp_before_member_friends_content', 'bp_checkins_load_members_map');
+			
+			add_action('bp_actions', 'bp_checkins_enhanced_load_gmap3', 99);
+			
+			add_filter( 'bp_get_checkins_places_avatar', 'bpce_places_avatar_filter');
+			
+		}
+	}		
+}
+add_action('bp_include', 'bp_checkins_enhanced_init');
 
 /**
- * GMW function - Geocode address
+ * GeoMyWP GMW function - Geocode address
  * @version 1.0
  * @author Eyal Fitoussi
  */
@@ -154,50 +207,6 @@ function cross_update_user_location_public($field_id, $value) {
 		bp_update_user_meta( $user_id, 'bpci_public_lng', $address['lng'] );
 	}
 }
-add_action('xprofile_profile_field_data_updated', 'cross_update_user_location_public', 10, 2);
-
-function auto_set_city_taxonomy($place) {
-	if ( is_int($place) && get_post_type($place) != 'places' )
-		return;
-		
-	if ( is_int( $place ) ) {
-		$post_id = $place;
-		//$lat = get_post_meta($post_id,'bpci_places_lat',true);
-		//$long = get_post_meta($post_id,'bpci_places_lng',true);
-		$address = get_post_meta($post_id,'bpci_places_address',true);
-		if(isset( $_REQUEST['bpci_places_address']))
-			$address = $_REQUEST['bpci_places_address'];
-		if(isset( $_REQUEST['bpci-address']))
-			$address = $_REQUEST['bpci-address'];
-	} elseif ( is_object( $place ) ) {
-		$address = $place->address;
-	} 
-		$post_id = $place->id;
-		$converted_address = bpce_GmwConvertToCoords($address);
-
-		//print_r($address);
-		//print_r($converted_address);
-
-		if(!empty($converted_address)):
-			$place_cities = wp_get_object_terms($post_id, 'city');
-			$city = $converted_address['province'];
-			if(!empty($place_cities)&&!is_wp_error( $place_cities )):
-				foreach($place_cities as $place_city):
-					if( $place_city->slug == $city || $place_city->name == $city )
-						return;
-				endforeach;
-			endif;
-			$city_term = get_term_by('name', $city, 'city');
-			if(empty($city_term))
-				wp_set_object_terms( $post_id, $city, 'city' );
-			if(!empty($city_term))
-				wp_set_object_terms( $post_id, $city_term->slug, 'city' );
-		endif;
-}
-//add_action( 'save_post', 'auto_set_city_taxonomy' );
-//add_action( 'bp_checkins_places_after_address_postmeta_update', 'auto_set_city_taxonomy' );
-//add_action( 'bp_checkins_places_after_address_postmeta_insert', 'auto_set_city_taxonomy' );
-add_action( 'bp_checkins_places_after_save', 'auto_set_city_taxonomy' );
 
 function bp_checkins_places_permalink_filter($permalink){
 	//return str_replace(bp_get_checkins_root_slug().'/place/', '/'.__( 'places', 'bp-checkins' ).'/',$permalink);
@@ -240,12 +249,14 @@ function bp_checkins_enhanced_display_place_checkin($content=false){
 				$live_event = ' '.__('until','bp-checkins-enhanced').' '.$end;
 		}
 	if( $address ){
-			$div = '
-				<div class="activity-checkin">
-					<a href="'.$place_permalink.'" title="'.__('Open the map for this update', 'bp-checkins').'" id="place-'.$place_id.'" rel="'.$lat.','.$lng.'" class="link-checkin"><span class="update-checkin">'.stripslashes( $address ).'</span></a>'.$live_event.'
-				</div>
-				';
+		$pin = '<div class="places-avatar">'.bp_get_checkins_places_avatar().'</div>';
+		$div = '
+			<div class="activity-checkin">'.$pin.'
+				<a href="'.$place_permalink.'" title="'.__('Open the map for this update', 'bp-checkins').'" id="place-'.$place_id.'" rel="'.$lat.','.$lng.'" class="link-checkin"><span class="update-checkin">'.stripslashes( $address ).'</span></a>'.$live_event.'
+			</div>
+			';
 	}
+
 	if($content)
 		return $content.$div;
 	else
@@ -310,7 +321,6 @@ function bp_checkins_enhanced_load_core_actions(){
 	remove_action( 'bp_places_entry_content', 'bp_checkins_display_place_checkin');
 	add_action( 'bp_places_entry_content', 'bp_checkins_enhanced_display_place_checkin');
 }
-add_action( 'bp_loaded', 'bp_checkins_enhanced_load_core_actions' );
 
 function bp_checkins_add_members_position(){
 	global $wpdb;
@@ -357,10 +367,7 @@ function bp_checkins_add_members_position(){
 		}
 	//}
 }
-
-add_action('bp_directory_members_actions', 'bp_checkins_add_members_position', 99);
-//add_action('bp_directory_members_item', 'bp_checkins_add_members_position', 99);
-
+	
 function bp_checkins_load_members_map(){
 
 	//if( (int)bp_get_option( 'bp-checkins-disable-geo-friends' ) )
@@ -380,6 +387,10 @@ function bp_checkins_load_members_map(){
 	$lat = bp_get_user_meta( $user_id, 'bpci_latest_lat', true );
 	$lng = bp_get_user_meta( $user_id, 'bpci_latest_lng', true );
 	$address = bp_get_user_meta( $user_id, 'bpci_latest_address', true );
+	$post_selector = bp_get_option( 'bp-checkins-enhanced-place-post-selector' );
+	$title_selector = bp_get_option( 'bp-checkins-enhanced-place-title-selector' );
+	$text_selector = bp_get_option( 'bp-checkins-enhanced-place-text-selector' );
+	$thumb_selector = bp_get_option( 'bp-checkins-enhanced-place-thumb-selector' );
 	?>
 	<div id="bpci-map_container"></div>
 	
@@ -391,6 +402,10 @@ function bp_checkins_load_members_map(){
 			var displayedUserAddress = "<?php echo $address;?>";
 			var displayedUserPin = "<?php echo plugin_dir_url( __FILE__ ) . 'images/blackpin.png'; ?>";
 			var defaultPlacePin = "<?php echo plugin_dir_url( __FILE__ ) . 'images/pin.png'; ?>";
+			var PlacePostSelector = "<?php echo $post_selector ?>";
+			var PlaceTitleSelector = "<?php echo $title_selector ?>";
+			var PlaceTextSelector = "<?php echo $text_selector ?>";
+			var PlaceThumbSelector = "<?php echo $thumb_selector ?>";
 		</script>
 		
 	<?php else :?>
@@ -398,25 +413,20 @@ function bp_checkins_load_members_map(){
 		<script type="text/javascript">
 			var displayedUserPin = "<?php echo plugin_dir_url( __FILE__ ) . 'images/blackpin.png'; ?>";
 			var defaultPlacePin = "<?php echo plugin_dir_url( __FILE__ ) . 'images/pin.png'; ?>";
+			var PlacePostSelector = "<?php echo $post_selector ?>";
+			var PlaceTitleSelector = "<?php echo $title_selector ?>";
+			var PlaceTextSelector = "<?php echo $text_selector ?>";
+			var PlaceThumbSelector = "<?php echo $thumb_selector ?>";
 		</script>
 		
 	<?php endif;?>
 	
 	<?php
 }
-//add_action('bp_before_members_friends_content', 'bp_checkins_load_members_map');
-//add_action('bp_members_screen_index', 'bp_checkins_load_members_map');
-add_action('bp_before_directory_members', 'bp_checkins_load_members_map');
-add_action('bp_before_directory_checkins', 'bp_checkins_load_members_map');
-//add_action('bp_before_directory_activity', 'bp_checkins_load_members_map');
-add_action('activity_loop_start', 'bp_checkins_load_members_map');
-add_action('bp_before_member_friends_content', 'bp_checkins_load_members_map');
-
-//bp_checkins_place_geolocate
-//bp_checkins_place_display_cats
 
 function bp_checkins_enhanced_load_gmap3() {
-	if( bp_checkins_is_activity_or_friends() || bp_checkins_is_directory() || bp_checkins_is_group_checkins_area() ) {
+
+	if( bp_checkins_is_activity_or_friends() || bp_checkins_is_directory() || bp_checkins_is_group_checkins_area() || bp_checkins_is_user_area() ) {
 	
 		wp_enqueue_script( 'google-maps', 'http://maps.google.com/maps/api/js?sensor=false' );
 		wp_dequeue_script( 'gmap3' );
@@ -445,7 +455,7 @@ function bp_checkins_enhanced_load_gmap3() {
 			add_action('bp_before_member_friends_content', 'bp_checkins_load_members_map');
 		} else {
 			
-			if( bp_checkins_is_directory() || bp_checkins_is_group_checkins_area() ) {
+			if( bp_checkins_is_directory() || bp_checkins_is_group_checkins_area() || bp_checkins_is_user_area() ) {
 				wp_dequeue_script( 'bp-ckeckins-dir' );
 				wp_deregister_script( 'bp-ckeckins-dir' );
 				wp_register_script( 'bp-ckeckins-dir', plugin_dir_url( __FILE__ ) . 'js/bp-checkins-dir.js' );
@@ -463,7 +473,7 @@ function bp_checkins_enhanced_load_gmap3() {
 				bp_checkins_localize_script('activity');
 				add_action('activity_loop_start', 'bp_checkins_load_members_map');
 			}
-			
+
 		}
 		
 		if( bp_is_single_activity() ){
@@ -511,6 +521,7 @@ function bp_checkins_enhanced_load_gmap3() {
 			wp_dequeue_script( 'bp-ckeckins-single' );
 			wp_deregister_script( 'bp-ckeckins-single' );
 			wp_enqueue_script( 'bp-ckeckins-single', BP_CHECKINS_PLUGIN_URL_JS . '/bp-checkins-single.js' );
+			//wp_enqueue_script( 'bp-ckeckins-single', plugin_dir_url( __FILE__ ) . 'js/bp-checkins-single.js' );
 			bp_checkins_localize_script('single');
 			
 			remove_action( 'bpci_map_single', 'bp_checkins_place_map' );
@@ -521,16 +532,17 @@ function bp_checkins_enhanced_load_gmap3() {
 		wp_enqueue_script( 'bp-ckeckins-members', plugin_dir_url( __FILE__ ) . 'js/bp-checkins-members.js' );
 					
 	} elseif ( is_singular() && get_post_type()=='places' ){
-		
+		if ( (int)bp_get_option( 'bp-checkins-enhanced-places-events' ) ){
 			add_action('comment_form_after_fields', 'bp_checkins_places_geo_fields');
 			wp_enqueue_script( 'bp-ckeckins-single', BP_CHECKINS_PLUGIN_URL_JS . '/bp-checkins-single.js' );
+			//wp_enqueue_script( 'bp-ckeckins-single', plugin_dir_url( __FILE__ ) . 'js/bp-checkins-single.js' );
 			bp_checkins_localize_script('single');			
 			//add_action('bpci_map_single', 'bp_checkins_place_map');
-			//add_filter('the_content', 'bp_checkins_place_map_filter');
-			add_filter('the_excerpt', 'bp_checkins_place_map_filter');
+			add_filter('the_content', 'bp_checkins_place_map_filter');
 			add_action('comment_form_top', 'bp_checkins_places_geo_fields');
-			
+		}	
 	} elseif ( !is_404() && !is_search() && ( is_post_type_archive( 'places' ) || ( ( is_tax('places_category') || is_tax('city') ) && get_post_type()=='places' ) ) ) {
+		if ( (int)bp_get_option( 'bp-checkins-enhanced-places-events' ) ){
 			global $wp_query;
 			if($wp_query->is_main_query() && $wp_query->found_posts){
 			//add_filter('the_content','bp_checkins_place_map_filter');
@@ -540,11 +552,10 @@ function bp_checkins_enhanced_load_gmap3() {
 			//add_action( 'the_post', 'bp_checkins_enhanced_display_place_checkin');
 			add_action( 'loop_start', 'bp_checkins_load_members_map');
 			}
+		}
 	}
 
 }
-
-add_action('bp_actions', 'bp_checkins_enhanced_load_gmap3', 99);
 
 function bp_checkins_place_map_filter($content=false) {
 	global $bpci_lat, $bpci_lng;
@@ -715,7 +726,6 @@ function bpce_places_avatar_filter($output) {
 	return $output;
 	
 }
-add_filter( 'bp_get_checkins_places_avatar', 'bpce_places_avatar_filter');
 
 function bp_checkins_get_place_parent_category_avatar( $term_id ) {
 		
@@ -724,22 +734,21 @@ function bp_checkins_get_place_parent_category_avatar( $term_id ) {
 		$avatar_id = get_metadata( 'places_category', $term_id, 'places_category_thumbnail_id', true);
 			
 		if( !empty( $avatar_id ) ) {
+			$avatar_array = wp_get_attachment_image_src( $avatar_id, $size='thumbnail' );
+			$avatar = '<img src="'.$avatar_array[0].'" width="'.$avatar_array[1].'" height="'.$avatar_array[2].'">';
+		} else  {
+			$term = get_term($term_id, 'places_category');
+			//print_r($term);
+			$parent_id = $term->parent;
+			if($parent_id){
+				$avatar_id = get_metadata( 'places_category', $parent_id, 'places_category_thumbnail_id', true);
 				$avatar_array = wp_get_attachment_image_src( $avatar_id, $size='thumbnail' );
 				$avatar = '<img src="'.$avatar_array[0].'" width="'.$avatar_array[1].'" height="'.$avatar_array[2].'">';
-		} else  {
-				$term = get_term($term_id, 'places_category');
-				//print_r($term);
-				$parent_id = $term->parent;
-				if($parent_id){
-					$avatar_id = get_metadata( 'places_category', $parent_id, 'places_category_thumbnail_id', true);
-					$avatar_array = wp_get_attachment_image_src( $avatar_id, $size='thumbnail' );
-					$avatar = '<img src="'.$avatar_array[0].'" width="'.$avatar_array[1].'" height="'.$avatar_array[2].'">';
 			}
 		} 
-		
 		if( !$avatar ) {
 			$customdefaultimg = bp_get_option( 'bp-checkins-custom-default-img', plugin_dir_url( __FILE__ ) . 'images/pin.png' );
-			$avatar = '<img src="'.$customdefaultimg.'" width="150px" height="150px">';
+			$avatar = '<img src="'.$customdefaultimg.'" width="64px" height="64px">';
 		}
 		return $avatar;
 }
@@ -790,23 +799,5 @@ function post_author_link_buddypress($link, $author_id, $author_nicename) {
 	return $link = bp_core_get_user_domain( $author_id );
 }
 add_filter( 'author_link', 'post_author_link_buddypress', 10, 3 );
-/* THESE ARE THEME SPECIFIC FUNCTIONS => NEED TO HOOK AT HIGHER LEVEL AND THEN UPDATE JS JQUERY SELECTORS */
-function place_category_avatar_filter($list) {
-	if ( !is_admin() && ( ( is_single() && get_post_type()=='places' ) || is_post_type_archive( 'places' ) || ( is_tax('places_category') || is_tax('city') && get_post_type()=='places' ) ) ) {
-		$city = get_the_term_list( get_the_ID(), 'city' );
-		if($city)
-			$city = '</div><div class="post-details-spacer"></div><div class="post-details-city post-details-category">'.$city;
-		$list = '<div class="places-avatar">'.bp_get_checkins_places_avatar().'</div>'.get_the_term_list( get_the_ID(), 'places_category' ).$city;
-	}
-	return $list;
-}
-add_filter( 'the_category', 'place_category_avatar_filter' );
-function term_links_only_one($term_links) {
-	if ( !is_admin() && ( ( is_single() && get_post_type()=='places' ) || is_post_type_archive( 'places' ) || ( is_tax('places_category') || is_tax('city') && get_post_type()=='places' ) ) ) {
-		return array(reset($term_links));
-	}
-	return $term_links;
-}
-add_filter( 'term_links-places_category', 'term_links_only_one' );
-add_filter( 'term_links-city', 'term_links_only_one' );
+
 ?>

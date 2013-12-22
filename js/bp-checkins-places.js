@@ -9,18 +9,18 @@ jQuery(document).ready(function($){
 	
 	$("#places-stream .places-content .activity-checkin, #content .blog-post .text .activity-checkin").each(function(){
 		//alert($(this).find("a").attr('rel'));
-		var latlongtoparse = $(this).find("a").attr('rel').split(',');
+		var latlongtoparse = $(this).find('a.link-checkin').attr('rel').split(',');
 		//var avatar = $(this).parent().parent().find('.places-avatar').html();
-		var postdata = $(this).parent().parent().find('a.places-avatar').attr('rel').split('§');
+		var postdata = $(this).find('a.places-avatar').attr('rel').split('§');
 		//var avatar = $(this).parent().parent().find('.places-avatar').clone().find('a.places-avatar').attr('href', function() { return $(this).attr('rel'); }).removeAttr('rel').parent().html();
-		var avatar = $(this).parent().parent().find('.places-avatar').removeAttr('rel').clone().find('a.places-avatar').attr({href: postdata[1], title: postdata[0] }).parent().html();
-		var infotitle = $(this).parent().parent().find('.places-avatar').removeAttr('rel').parent().parent().parent().find('.post-title').html();
-		var infotext = $(this).parent().parent().find('.places-avatar').removeAttr('rel').parent().parent().parent().find('.text').html();
+		var avatar = $(this).find('a.places-avatar').removeAttr('rel').clone().attr({href: postdata[1], title: postdata[0] }).parent().html();
+		var infotitle = $(this).find('.places-avatar').parents(PlacePostSelector).find(PlaceTitleSelector).html();
+		var infotext = $(this).find('.places-avatar').parents(PlacePostSelector).find(PlaceTextSelector).html();
 		var infothumb = '';
-		if($(this).parent().parent().find('.places-avatar').removeAttr('rel').parent().parent().parent().find('.thumbnail').length)
-			infothumb = $(this).parent().parent().find('.places-avatar').removeAttr('rel').parent().parent().parent().find('.thumbnail').html();
+		if($(this).find('.places-avatar').parents(PlacePostSelector).find(PlaceThumbSelector).length)
+			infothumb = $(this).find('.places-avatar').parents(PlacePostSelector).find(PlaceThumbSelector).html();
 		//var infotext = '';
-		var mappin = $(this).parent().parent().find('.places-avatar').removeAttr('rel').clone().find('a.places-avatar img').attr('src');
+		var mappin = $(this).find('.places-avatar').clone().find('img').attr('src');
 		lat = Number(latlongtoparse[0]);
 		lng = Number(latlongtoparse[1]);
 		
@@ -61,8 +61,8 @@ jQuery(document).ready(function($){
 		var infotext = '';
 		
 		if( -1 == bpci_is_on_map( lat, lng, infotitle+infothumb+infotext ) ) {
-			add($('#bpci-map'), arrayMarkers.length, lat, lng, infotitle+infothumb+infotext, $(this).parent().parent().parent().find('a.places-avatar img').attr('src'));
-			arrayMarkers.push( { lat:lat, lng:lng, data:infotitle+infothumb+infotext, pin:$(this).parent().parent().parent().find('a.places-avatar img').attr('src') } );
+			add($('#bpci-map'), arrayMarkers.length, lat, lng, infotitle+infothumb+infotext, $(this).parent().find('a.places-avatar img').attr('src'));
+			arrayMarkers.push( { lat:lat, lng:lng, data:infotitle+infothumb+infotext, pin:$(this).parent().find('a.places-avatar img').attr('src') } );
 		}
 		
 		map = $('#bpci-map').gmap3({ action:'get', name:'map'});

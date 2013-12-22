@@ -80,11 +80,14 @@ div#bp-checkins-room{
 	padding-right:0.5em;
 }
 
+.activity-checkin .places-avatar{
+	float:left;
+}
 .link-checkin{
 	text-decoration:none;
-	background:url(../images/checkin-small.png) no-repeat;
-	padding-left:20px;
-	line-height:18px!important;
+	/* background:url(../images/checkin-small.png) no-repeat; */
+	padding-left:40px;
+	line-height:40px!important;
 	/* height:18px!important; */
 	display:block;
 }
