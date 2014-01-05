@@ -307,9 +307,9 @@ jQuery(document).ready(function($){
 		}
 		for (var i=0; i < arrayOvers.length ; i++ ) {
 			newOverlays[i] = {
-					latLng:[arrayMarkers[i].lat, arrayMarkers[i].lng], 
-					data: arrayMarkers[i].data,
-					options:{	content: '<div class="bpci-avatar"><s></s><i></i><span>' + arrayMarkers[i].data + '</span></div>',
+					latLng:[arrayOvers[i].lat, arrayOvers[i].lng], 
+					data: arrayOvers[i].data,
+					options:{	content: '<div class="bpci-avatar"><s></s><i></i><span>' + arrayOvers[i].data + '</span></div>',
 								offset:{
 									y:-40,
 									x:10
