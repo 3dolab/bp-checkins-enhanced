@@ -189,6 +189,7 @@ form#places-form #new-place-content input[type=time],
     border: 1px dashed #C0C0C0;
     width: 100%;
     height: 18em;
+	clear: both;
 }
 
 #bpci-place-map{

@@ -1044,7 +1044,7 @@ jQuery(document).ready(function($){
 	}
 	
 	function bpce_init_places_map(scope){
-		
+
 		if ( scope == 'places' ) {
 			var map_selector = "bpci-places-map";		
 		} else {
@@ -1073,6 +1073,7 @@ jQuery(document).ready(function($){
 		bpce_add_places_to_map(scope);
 	}
 	function bpce_add_places_to_map(scope){
+	
 		var arrayMarkers = new Array();
 		var newMarkers = new Array();
 		var newOverlays = new Array();
@@ -1086,9 +1087,10 @@ jQuery(document).ready(function($){
 			var avatar_selector = "activity-avatar";
 		}
 		//alert($(selector).html());
+		
 		$(selector).each(function(){
 			//alert($(this).find("a").attr('rel'));
-			var georel = $(this).find("a").attr('rel');
+			var georel = $(this).find("a.link-checkin").attr('rel');
 			if(georel)
 				var latlongtoparse = georel.split(',');
 			//var avatar = $(this).parent().parent().find('.'+avatar_selector).html();			
@@ -1126,7 +1128,6 @@ jQuery(document).ready(function($){
 		});
 	
 		for (var i=0; i < arrayMarkers.length ; i++ ) {
-			//alert(arrayMarkers[i].data);
 			if ( scope == 'places' ){
 				newMarkers[i] = {
 					latLng:[arrayMarkers[i].lat, arrayMarkers[i].lng], 
@@ -1149,7 +1150,6 @@ jQuery(document).ready(function($){
 		//alert('aM'+arrayMarkers.length);
 
 		if ( scope == 'places' ) { 
-				//alert('nM'+newMarkers.length);
 			$('#'+map_selector).gmap3(		
 			  { marker: { 
 					 values: newMarkers,
